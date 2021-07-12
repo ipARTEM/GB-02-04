@@ -4,40 +4,6 @@ using System.Diagnostics;
 
 namespace GB_02_04
 {
-
-
-
-    public class User
-    {
-        public string FirstName { get; set; }
-        public string SecondName { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            var user = obj as User;
-
-            if (user == null)
-                return false;
-
-            return FirstName == user.FirstName && SecondName == user.SecondName;
-        }
-
-        public override int GetHashCode()
-        {
-            int firtsNameHashCode = FirstName?.GetHashCode() ?? 0;
-            int secondNameHashCode = SecondName?.GetHashCode() ?? 0;
-            return firtsNameHashCode ^ secondNameHashCode;
-        }
-    }
-
-
-    
-
-
-
-
-
-
     class Program
     {
         static string[] array;
@@ -80,69 +46,202 @@ namespace GB_02_04
         static void TestSpeed(int quantityTest)
         {
 
-            Console.WriteLine("*************************Тестирование*************************");
+            Console.WriteLine("**************************Тестирование**************************");
 
             Console.WriteLine(" array        hashSet    ");
 
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var stringChars = new char[newLength];
-            var random = new Random();
-
-            for (int j = 0; j < stringChars.Length; j++)
+            for (int i = 0; i < quantityTest; i++)
             {
-                stringChars[j] = chars[random.Next(chars.Length)];
-            }
+                var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                var stringChars = new char[newLength];
+                var random = new Random();
 
-            var finalString = new String(stringChars);
-
-            sw = new Stopwatch();
-            sw.Start();
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (finalString==i.ToString())
+                for (int j = 0; j < stringChars.Length; j++)
                 {
-                    Console.WriteLine("НАШЁЛ");
-                    break;
-
+                    stringChars[j] = chars[random.Next(chars.Length)];
                 }
 
-            }
-            sw.Stop();
-            Console.Write($" {sw.ElapsedTicks}       ");
+                var finalString = new String(stringChars);
 
-            sw.Start();
+                sw = new Stopwatch();
+                sw.Start();
 
-            for (int i = 0; i < hashSet.Count; i++)
-            {
-                if (finalString == i.ToString())
+                for (int k = 0; k < array.Length; k++)
                 {
-                    Console.WriteLine("НАШЁЛ");
-                    break;
+                    if (finalString == k.ToString())
+                    {
+                        Console.WriteLine("НАШЁЛ");
+                        break;
+
+                    }
 
                 }
+                sw.Stop();
+                Console.Write($" {sw.ElapsedTicks}       ");
 
+                sw.Start();
+
+                for (int k = 0; k < hashSet.Count; k++)
+                {
+                    if (finalString == k.ToString())
+                    {
+                        Console.WriteLine("НАШЁЛ");
+                        break;
+
+                    }
+
+                }
+                sw.Stop();
+                Console.Write($" {sw.ElapsedTicks}       ");
+
+                Console.WriteLine("НЕ НАШЁЛ");
             }
-            sw.Stop();
-            Console.Write($" {sw.ElapsedTicks}       ");
-
-            Console.WriteLine("НЕ НАШЁЛ");
-
-
 
         }
 
 
+        //***************************************************
+
+        
+
+        public static Node<int> Insert(Node<int> head, int value)
+        {
+            Node<int> tmp = null;
+            if (head == null)
+            {
+                head = GetFreeNode(value, null);
+                return head;
+            }
+
+            tmp = head;
+            while (tmp != null)
+            {
+                if (value > tmp.Data)
+                {
+                    if (tmp.Right != null)
+                    {
+                        tmp = tmp.Right;
+                        continue;
+                    }
+                    else
+                    {
+                        tmp.Right = GetFreeNode(value, tmp);
+                        return head;
+                    }
+                }
+                else if (value < tmp.Data)
+                {
+                    if (tmp.Left != null)
+                    {
+                        tmp = tmp.Left;
+                        continue;
+                    }
+                    else
+                    {
+                        tmp.Left = GetFreeNode(value, tmp);
+                        return head;
+                    }
+                }
+                else
+                {
+                    throw new Exception("Wrong tree state");                  // Дерево построено неправильно
+                }
+            }
+            return head;
+        }
+
+        private static Node<int> GetFreeNode(int value, Node<int> tmp)
+        {
+            counter++;
+
+            var nl = counter / 2;
+            var nr = counter - nl - 1;
+            tmp = new Node<int> { Data = value };
+
+            tmp.Left = Tree(nl);
+            tmp.Right = Tree(nr);
 
 
 
+            //if (newNode.Data == 0)
+            //    return null;
+            //else
+            //{
 
+
+            //    tmp = new Node<int> { Data= value };
+            //    //
+
+            //    tmp.Left = Tree(nl);
+            //    tmp.Right = Tree(nr);
+            //}
+            return tmp;
+        }
+
+        static int counter;
+
+        public static Node<int> Tree(int n)
+        {
+            //counter ++;
+
+            Node<int> newNode= null;
+            if (n == 0)
+                return null;
+            else
+            {
+                var nl = n / 2;
+                var nr = n - nl - 1;
+                newNode = new Node<int>();
+                newNode.Data = new Random().Next(0,100);
+                newNode.Left = Tree(nl);
+                newNode.Right = Tree(nr);
+            }
+            return newNode;
+        }
+        static public void PreOrderTravers(Node<int> root, string tr=" ")
+        {
+            if (root != null)
+            {
+                Console.WriteLine("{1} {0}", root.Data, tr);
+                PreOrderTravers(root.Left, $"{tr}{new string(' ',3)}");
+                PreOrderTravers(root.Right, $"{tr}{new string(' ', 3)}");
+            }
+        }
 
         static void Main(string[] args)
         {
-            RandomGenerator(1000,1000);
 
-            TestSpeed(100);
+            // 1
+            RandomGenerator(100_000,1_000);       //кол-во строк , длина строки
+
+            TestSpeed(20);                       // кол-во тестов
+
+            Console.WriteLine(new string('*',65));
+
+            //2
+
+            var forest= Tree(10);
+
+            PreOrderTravers(forest);
+
+            //Console.WriteLine(new string('*', 65));
+
+            //GetFreeNode(7, forest);
+
+            //PreOrderTravers(forest);
+
+            //Insert(forest, 15);
+
+            //PreOrderTravers(forest);
+
+            //Console.WriteLine(new string('*', 65));
+
+
+
+
+
+
+
 
 
         }
